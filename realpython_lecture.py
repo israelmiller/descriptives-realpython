@@ -1,8 +1,6 @@
 #import packages
 import math
-from re import X
 import statistics
-from tkinter import Y
 import numpy as np
 import scipy.stats
 import pandas as pd
