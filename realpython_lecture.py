@@ -6,6 +6,7 @@ from tkinter import Y
 import numpy as np
 import scipy.stats
 import pandas as pd
+import matplotlib.pyplot as plt
 
 #Create a list of numbers
 
@@ -347,8 +348,10 @@ result.mean
 #kurtosis: the kurtosis
 
 #Pandas
-z.describe()
-
+result = z.describe()
+result
+#to access a particular value, you can use the index operator.
+result['mean']
 #the result is a pandas Series object with the following attributes:
 #count: the number of observations
 #mean: the mean
@@ -359,3 +362,291 @@ z.describe()
 #75%: the third quartile
 #max: the maximum value
 
+##Correlation
+#Correlation is a statistical measure that indicates the extent to which two variables are linearly related.
+#the different measures of correlation are:
+#positive correlation: when two variables increase or decrease together
+#negative correlation: when one variable increases as the other decreases
+#no correlation: when there is no relationship between the variables
+
+#the two statistics that measure correlation are covariance and the correlation coefficient.
+
+x = list(range(-10,11))
+y = [0, 2, 2, 2, 2, 3, 3, 6, 7, 4, 7, 6, 6, 9, 4, 5, 5, 10, 11, 12, 14]
+x_,y_ =  np.array(x), np.array(y)
+x__,y__ = pd.Series(x_), pd.Series(y_)
+
+##Covariance
+#sample covariance is a measure of the joint variability of two variables.
+#the different measures of covariance are:
+#positive covariance: when two variables increase or decrease together
+#negative covariance: when one variable increases as the other decreases
+#no covariance: when there is no relationship between the variables
+
+#the covariance can be calculated in pure Python using the following formula:
+n = len(x)
+mean_x, mean_y = sum(x)/n, sum(y)/n
+cov_xy = sum((x[k]-mean_x)*(y[k]-mean_y) for k in range(n))/(n-1)
+cov_xy
+
+#you can also use the numpy cov() function to calculate the covariance.
+cov_matrix = np.cov(x_, y_)
+cov_matrix
+#the result is a 2x2 matrix with the covariance of x and y in the first row and second column.
+
+
+#you can also use the pandas Series objects to calculate the covariance.
+cov_xy = x__.cov(y__)
+cov_xy
+#or
+cov_matrix = y__.cov(x__)
+cov_matrix
+
+#the result is the same as the one calculated in pure Python.
+
+##Correlation Coefficient
+#the correlation coefficient is a normalized measure of covariance.
+#the correlation coefficient is a value between -1 and 1 that indicates 
+#the strength and direction of a linear relationship between two variables.
+
+# the correlation coefficient (r) can be interpreted as follows:
+#r = 1: perfect positive correlation
+#r ≈ 0: no correlation
+#r = -1: perfect negative correlation
+#r > 0: positive correlation
+#r < 0: negative correlation
+
+#the correlation coefficient can be calculated in pure Python using the following formula:
+var_x = sum((item - mean_x)**2 for item in x)/(n-1)
+var_y = sum((item - mean_y)**2 for item in y)/(n-1)
+std_x, std_y = var_x**0.5, var_y**0.5
+r = cov_xy/(std_x*std_y)
+r
+
+#you can use scipy.stats.pearsonr() to calculate the correlation coefficient. 
+#the function returns the correlation coefficient and the p-value.
+r, p = scipy.stats.pearsonr(x_, y_)
+r
+p
+
+#you can also use the numpy corrcoef() function to calculate the correlation coefficient.
+#function returns a 2x2 matrix with the correlation coefficient of x and y in the first row and second column.
+corr_matrix = np.corrcoef(x_, y_)
+corr_matrix
+
+#you can also use linear regression to calculate the correlation coefficient.
+result = scipy.stats.linregress(x_,y_)
+r = result.rvalue
+r
+
+#you can also use the pandas Series objects to calculate the correlation coefficient.
+r = x__.corr(y__)
+r
+#or
+r = y__.corr(x__)
+r
+
+###Working with 2D Data
+##Axes
+a = np.array([[1, 1, 1],
+             [2, 3, 1],
+             [4, 9, 2],
+             [8, 27, 4],
+             [16, 1, 1]])
+#you can apply the same functions to 2D data as you did to 1D data.
+np.mean(a)
+np.median(a)
+np.var(a, ddof=1)
+#the functions have an option parameter axis that allows you to specify the axis along which to calculate the statistic.
+#axis=none: the default case. the function is applied to all elements in the array.
+#axis=0: calculate the statistic across all rows
+#axis=1: calculate the statistic across all columns
+
+np.mean(a, axis=0)
+
+#the result is an array with the mean of each column.
+
+np.mean(a, axis=1)
+
+#the result is an array with the mean of each row.
+
+#the axis parameter can be used with other numpy functions.
+np.median(a, axis=0)
+np.median(a, axis=1)
+np.var(a, ddof=1, axis=0)
+np.var(a, ddof=1, axis=1)
+
+#SciPy statistics are similar.
+scipy.stats.gmean(a) #default axis = 0
+scipy.stats.gmean(a, axis=0)
+scipy.stats.gmean(a, axis=1)
+scipy.stats.gmean(a, axis=None) #statistic is applied to all elements in the array
+
+result = scipy.stats.describe(a, axis =1, ddof=1, bias=False)
+result.mean
+
+##DataFrames
+row_names = ['first', 'second', 'third', 'fourth', 'fifth']
+col_names = ['A', 'B', 'C']
+df = pd.DataFrame(a, index=row_names, columns=col_names)
+df
+#DF methods are similar to series methods. if you call a stats method on a DF, it will be applied to each column by default.
+df.mean()
+df.var()
+#if you want to apply the method to each row, you can use the axis parameter.
+df.mean(axis=1)
+df.var(axis=1)
+
+#you can isolate a column or row using the column name or row name.
+df['A'].mean()
+df['A'].var()
+
+df.loc['first'].mean()
+df.loc['first'].var()
+
+#sometimes you may want to use an DF as a numpoy array.
+#you can use the values attribute to get a numpy array.
+df.values
+#you can also use the to_numpy() method.
+df.to_numpy()
+
+#the .describe() method is also available for DFs.
+df.describe()
+
+#the resulting DF has the mean, standard deviation, min, max, and quartiles for each column.
+
+#you can access the values in the resulting DF:
+
+df.describe().at['mean', 'A']
+df.describe().at['50%', 'B']
+
+###Visualizing Data
+
+plt.style.use('ggplot')
+
+##Boxplots 
+#boxplots are a useful way to visualize the distribution of data.
+
+np.random.seed(seed = 0)
+x = np.random.randn(1000)
+x_ = pd.Series(np.random.randn(1000))
+y = np.random.randn(100)
+z = np.random.randn(10)
+
+#you can use the boxplot() function to create a boxplot.
+fig, ax = plt.subplots()
+ax.boxplot((x,y,z), vert=False, showmeans=True,meanline=True, 
+            labels=('x', 'y', 'z'), patch_artist=(True),
+            medianprops={'linewidth': 2, 'color': 'purple'},
+            meanprops={'linewidth': 2, 'color': 'red'},)
+plt.show()
+
+#the parameters of .boxplot() are:
+#x: the data to plot
+#vert: if True, the boxes are vertical. if False, the boxes are horizontal.
+#showmeans: if True, the mean is shown.
+#meanline: if True, a line is drawn at the mean.
+#labels: the labels for each box.
+#patch_artist: if True, the boxes are filled with color.
+#medianprops: a dictionary of properties for the median line.
+#meanprops: a dictionary of properties for the mean line.
+
+##Histograms
+#histograms are a useful way to visualize the distribution of data.
+#they are particularly useful when there is a large number of data points.
+#frequency is used to correspond to each bin.
+
+#the function np.histogram() returns the frequency and the bin edges.
+hist, bin_edges = np.histogram(x, bins=10)
+hist
+bin_edges
+
+#you can use the hist() function to visualize the histogram.
+fig, ax = plt.subplots()
+ax.hist(x, bin_edges, cumulative=False)
+ax.set_xlabel('x')
+ax.set_ylabel('Frequency')
+plt.show()
+
+#the parameters of .hist() are:
+#x: the data to plot
+#bins: the number of bins or the bin edges.
+#cumulative: if True, the histogram is cumulative.
+fig, ax = plt.subplots()
+ax.hist(x, bin_edges, cumulative=True)
+ax.set_xlabel('x')
+ax.set_ylabel('Frequency')
+plt.show()
+
+#cumulative values are the sum of the frequencies of all bins up to and including the current bin.
+
+##Pie Charts
+#useful way to visualize relative frequencies.
+
+x,y,z = 128,256,1024
+
+#you can use the pie() function to create a pie chart.
+fig, ax = plt.subplots()
+ax.pie((x,y,z), labels=('x', 'y', 'z'), autopct='%1.1f%%')
+plt.show()
+
+##Bar Charts
+x = np.arange(21)
+#above is an array of integers from 0 to 20.
+y = np.random.randint(21, size=21)
+err = np.random.randint(21)
+
+#you can use the bar() function to create a bar chart.
+fig, ax = plt.subplots()
+ax.bar(x, y, yerr=err)
+ax.set_xlabel('x')
+ax.set_ylabel('y')
+plt.show()
+
+##X-Y Plots
+#represents the pairs of data from two data sets.
+#you can optionally create a line of best fit.
+
+x = np.arange(21)
+y = 5 + 2 * x + 2 * np.random.randn(21)
+slope, intercept, r, *__ = scipy.stats.linregress(x, y)
+line = f'Regression line: y={intercept:.2f}+{slope:.2f}x, r={r:.2f}'
+fig, ax = plt.subplots()
+ax.plot(x, y, linewidth=0, marker='s', label='Data points')
+ax.plot(x, intercept + slope * x, label=line)
+ax.set_xlabel('x')
+ax.set_ylabel('y')
+ax.legend(facecolor='white')
+plt.show()
+
+##Heatmaps
+#can be used to visually show a matrix.
+#the colors represent the values in the matrix.
+
+matrix = np.cov(x,y).round(decimals=2)
+fix, ax = plt.subplots()
+ax.imshow(matrix)
+ax.grid(False)
+ax.xaxis.set(ticks=(0,1), ticklabels=('x', 'y'))
+ax.yaxis.set(ticks=(0,1), ticklabels=('x', 'y'))
+ax.set_ylim(1.5,-0.5)
+for i in range(2):
+    for j in range(2):
+        ax.text(j, i, matrix[i, j], ha='center', va='center', color='w')
+plt.show()
+
+#The yellow color represents the highest value.
+#The purple color represents the lowest value.
+
+#You can obtain heat map of correlation coefficients using the corrcoef() method.
+matrix = np.corrcoef(x, y).round(decimals=2)
+fig, ax = plt.subplots()
+ax.imshow(matrix)
+ax.grid(False)
+ax.xaxis.set(ticks=(0, 1), ticklabels=('x', 'y'))
+ax.yaxis.set(ticks=(0, 1), ticklabels=('x', 'y'))
+ax.set_ylim(1.5, -0.5)
+for i in range(2):
+    for j in range(2):
+        ax.text(j, i, matrix[i, j], ha='center', va='center', color='w')
+plt.show()
