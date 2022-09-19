@@ -207,3 +207,155 @@ mode_
 
 ##Variance
 #Quantifies the spread of the data in a dataset.
+
+#you can implement the variance in pure Python
+n = len(x)
+mean_ = sum(x) / n
+var_ = sum((item-mean_)**2 for item in x)/(n-1)
+var_
+
+#you can also use the statistics module to calculate the variance
+var_ = statistics.variance(x)
+var_
+#nan values in the dataset will result in a nan output
+
+#you can also use numpy to calculate the variance
+var_ = np.var(y, ddof=1)
+var_
+#or
+var_ = y.var(ddof=1)
+var_
+#nan values in the dataset will result in a nan output. You can use nanvar() to ignore nan values.
+#its important to specify delta degrees of freedom (ddof)
+
+##Standard Deviation
+#The standard deviation is the square root of the variance.
+
+#you can implement the standard deviation in pure Python
+std_ = var_ ** .5
+std_
+
+#you can also use the statistics module to calculate the standard deviation
+std_ = statistics.stdev(x)
+std_
+#nan values in the dataset will result in a nan output
+#you can provide a mean value to the stdev() function to avoid calculating the mean in the function
+
+#you can also use numpy to calculate the standard deviation
+std_ = np.std(y, ddof=1)
+std_
+#dont forget to specify delta degrees of freedom (ddof) as 1!
+#nan values in the dataset will result in a nan output. You can use nanstd() to ignore nan values.
+
+#pandas Series objects ignore nan values by default.
+std_ = z_with_nan.std()
+std_
+
+##Skewness
+#Skewness is a measure of the asymmetry in a dataset.
+#positive skewness indicates that the tail on the right side of the distribution is longer or fatter than the tail on the left side.
+#negative skewness indicates that the tail on the left side of the distribution is longer or fatter than the tail on the right side.
+
+#you can implement skewness in pure Python
+x = [8.0, 1, 2.5, 4, 28.0]
+n = len(x)
+mean_ = sum(x) / n
+var_ = sum((item-mean_)**2 for item in x)/(n-1)
+std_ = var_ ** .5
+skew_ = sum((item-mean_)**3 for item in x) * n / ((n-1)*(n-2)*std_**3)
+skew_
+#the skewness is positive, so x has a right-side tail.
+
+#you can also use scipy.stats.skew() to calculate skewness
+scipy.stats.skew(y, bias=False)
+#the result is the same as the one calculated in pure Python. The bias parameter is set to false to allow for corrections in the calculation of the skewness.
+#the optional nan_policy parameter can accept the values 'propagate', 'raise', and 'omit'. 
+
+#pandas Series objects have a skew() method that ignores nan values by default.
+z.skew()
+
+##Percentiles
+#Percentiles are used to divide a dataset into groups of equal size.
+#3 quartiles divide a dataset into 4 groups of equal size.:
+#the first quartile (Q1) is the 25th percentile
+#the second quartile (Q2) is the 50th percentile
+#the third quartile (Q3) is the 75th percentile
+
+#the statistics module has a function to create quantiles.
+x = [-5.0, -1.1 , 0.1, 2.0, 8.0, 12.8, 21, 25.8, 41.0]
+statistics.quantiles(x, n=2)
+statistics.quantiles(x,n=4, method='inclusive')
+#in the above example, the n parameter specifies the number of quantiles to create. 
+# The method parameter specifies the method used to calculate the quantiles.
+
+#you can use the numpy percentile() function to determine any percentile in a dataset
+y = np.array(x)
+np.percentile(y, 5)
+np.percentile(y, 95)
+
+#the percentile() function accepts several arguments and can also be used to calculate quartiles.
+np.percentile(y, [25, 50, 75])
+np.median(y)
+
+#if you want to ignore nan values, you can use the nanpercentile() function
+y_with_nan = np.insert(y,2,np.nan)
+y_with_nan
+np.nanpercentile(y_with_nan, [25, 50, 75])
+
+#pandas Series objects have a quantile() method that ignores nan values by default.
+z, z_with_nan = pd.Series(y), pd.Series(y_with_nan)
+z.quantile(.05)
+z.quantile(.95)
+z.quantile([.25, .5, .75])
+z_with_nan.quantile([.25, .5, .75])
+
+##Ranges
+#range is the difference between the largest and smallest values in a dataset.
+
+#you can use the function np.ptp() to calculate the range of a dataset
+np.ptp(y)
+np.ptp(z)
+np.ptp(z_with_nan)
+np.ptp(y_with_nan)
+
+##Interquartile Range
+#the interquartile range (IQR) is the difference between the third and first quartiles.
+
+quartiles = np.quantile(y, [0.25, 0.75])
+quartiles[1] - quartiles[0]
+
+#pandas objects are a bit different. you label with .75 and .25.
+quartiles = z.quantile([.25, .75])
+quartiles[.75] - quartiles[.25]
+
+##Summary of Descriptive Statistics
+#SciPy and Pandas offer functions to quickly calculate descriptive statistics for a dataset.
+
+#SciPy
+result = scipy.stats.describe(y, ddof=1, bias=False)
+result
+#you can omit ddof=1 as it is the default case. 
+#you can forsc bias correction in skewness and kurtosis with bias=False.
+#with (.) dot notation you can access particular values.
+result.mean
+#the result is a named tuple with the following attributes:
+#nobs: the number of observations
+#minmax: the minimum and maximum values
+#mean: the mean
+#variance: the variance
+#skewness: the skewness
+#kurtosis: the kurtosis
+
+#Pandas
+z.describe()
+
+#the result is a pandas Series object with the following attributes:
+#count: the number of observations
+#mean: the mean
+#std: the standard deviation
+#min: the minimum value
+#25%: the first quartile
+#50%: the second quartile
+#75%: the third quartile
+#max: the maximum value
+
